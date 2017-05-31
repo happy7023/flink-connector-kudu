@@ -1,5 +1,6 @@
 package pro.boto.flink.connector.kudu.function;
 
+import org.apache.flink.util.Collector;
 import pro.boto.flink.connector.kudu.KuduException;
 import pro.boto.flink.connector.kudu.schema.KuduFilter;
 import pro.boto.flink.connector.kudu.schema.KuduRow;
@@ -9,31 +10,35 @@ import pro.boto.protolang.domain.ProtoObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KuduReadFunction<T extends ProtoObject> extends KuduFunction<List<KuduFilter>,List<T>>  {
+public class KuduReadFunction extends KuduFunction<List<KuduFilter>,KuduRow>  {
 
-    private Class<T> clazz;
-
-    public KuduReadFunction(KuduTable table, Class<T> clazz) throws KuduException {
+    public KuduReadFunction(KuduTable table) throws KuduException {
         super(table);
-        this.clazz = clazz;
-        LOG.info("reader created");
     }
 
 
     @Override
-    public List<T> map(List<KuduFilter> filters) throws KuduException {
+    public KuduRow map(List<KuduFilter> filters) throws KuduException {
         connect();
 
         List<KuduRow> rows = connector.read(table, filters);
-        LOG.info("reading rows on table \"" + this.table.getName() +"\" with filters "+filters);
 
-        List<T> values = new ArrayList<>();
-        for (KuduRow row: rows) {
-            values.add(row.blind(clazz));
+        if(rows == null || rows.isEmpty()) return null;
+
+        if(!rows.isEmpty() && rows.size()>1){
+            throw new KuduException("only expected one row and obtain "+rows.size());
         }
 
-        return values;
+        return rows.get(0);
 
     }
 
+    @Override
+    public void flatMap(List<KuduFilter> filters, Collector<KuduRow> collector) throws Exception {
+        connect();
+
+        List<KuduRow> rows = connector.read(table, filters);
+
+        rows.forEach(row -> collector.collect(row));
+    }
 }

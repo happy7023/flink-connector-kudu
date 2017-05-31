@@ -85,6 +85,10 @@ public class KuduConnector implements AutoCloseable {
         }
     }
 
+    public List<KuduRow> read(KuduTable table) throws pro.boto.flink.connector.kudu.KuduException {
+        return read(table, new ArrayList<>());
+    }
+
     public List<KuduRow> read(KuduTable table, List<KuduFilter> filters) throws pro.boto.flink.connector.kudu.KuduException {
         try {
             org.apache.kudu.client.KuduTable kTable = openTable(table);
@@ -136,7 +140,8 @@ public class KuduConnector implements AutoCloseable {
                                     values.put(colName, row.getBoolean(colName));
                                     break;
                                 case UNIXTIME_MICROS:
-                                    values.put(colName, new Date(row.getLong(colName)));
+                                    long time = row.getLong(colName)/1000;
+                                    values.put(colName, new Date(time));
                                     break;
                                 case BINARY:
                                     throw new pro.boto.flink.connector.kudu.KuduException("not mapped filter");

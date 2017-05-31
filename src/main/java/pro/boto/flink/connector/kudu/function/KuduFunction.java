@@ -13,8 +13,7 @@ import pro.boto.flink.connector.kudu.schema.KuduTable;
 
 import java.util.List;
 
-abstract class KuduFunction<IN,OUT> implements MapFunction<IN,OUT> {
-    protected final Logger LOG = Logger.getLogger(this.getClass());
+abstract class KuduFunction<IN,OUT> implements MapFunction<IN,OUT>, FlatMapFunction<IN,OUT> {
 
     protected transient KuduConnector connector;
     protected KuduTable table;

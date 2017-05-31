@@ -8,17 +8,16 @@ import pro.boto.protolang.domain.ProtoObject;
 
 import java.util.Collections;
 
-public class KuduUpsertAsyncFunction<T extends ProtoObject<T>> extends KuduAsyncFunction<T,T> {
+public class KuduUpsertAsyncFunction extends KuduAsyncFunction<KuduRow,KuduRow> {
 
     public KuduUpsertAsyncFunction(KuduTable table) throws KuduException {
         super(table);
-        LOG.info("upsert created");
     }
 
     @Override
-    public void asyncInvoke(T proto, AsyncCollector<T> asyncCollector) throws KuduException {
-        connector.upsert(table, new KuduRow(proto));
-        asyncCollector.collect(Collections.singleton(proto));
+    public void asyncInvoke(KuduRow row, AsyncCollector<KuduRow> asyncCollector) throws KuduException {
+        connector.upsert(table, row);
+        asyncCollector.collect(Collections.singleton(row));
     }
 
 }

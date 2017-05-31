@@ -8,8 +8,7 @@ import pro.boto.flink.connector.kudu.KuduException;
 import pro.boto.flink.connector.kudu.schema.KuduConnector;
 import pro.boto.flink.connector.kudu.schema.KuduTable;
 
-abstract class KuduAsyncFunction<IN,OUT> extends RichAsyncFunction<IN,OUT> {
-    protected final Logger LOG = Logger.getLogger(this.getClass());
+public abstract class KuduAsyncFunction<IN,OUT> extends RichAsyncFunction<IN,OUT> {
 
     protected transient KuduConnector connector;
     protected KuduTable table;
